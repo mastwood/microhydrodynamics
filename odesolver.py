@@ -17,7 +17,7 @@ x=np.linspace(-15,15,31)
 y=x
 z=x
 positions=np.mgrid[0:30.0:31j,
-                      0:0:31j,
+                      -15:15:31j,
                       -15:15:31j]
 xx, yy, zz = positions
 
@@ -62,10 +62,11 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = pl.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.plot(trajectory[:,0],trajectory[:,1],trajectory[:,2])
-
-
+ax.plot(singularity_position[0]*np.ones_like(singularity_position[1]),singularity_position[1],singularity_position[2])
 pl.show()
-if 0:
+
+
+if False:
     quivskip=2
     for T in TT:
         ux = np.zeros_like(xx)
@@ -91,15 +92,14 @@ if 0:
         fig = pl.figure(figsize=(12,6))
         ax = fig.gca()
         ax.set_aspect('equal')
+        #plot the speed
+        splt = ax.contourf(pltxx, pltyy, np.log(pltspd),alpha=0.4)
+        fig.colorbar(splt) 
 
         #plot the vector field
         ax.quiver(pltxx[quivi,quivj], pltyy[quivi,quivj], 
                 pltux[quivi,quivj]/pltspd[quivi,quivj], 
-                pltuy[quivi,quivj]/pltspd[quivi,quivj])
-
-        #plot the speed
-        splt = ax.contourf(pltxx, pltyy, np.log(pltspd))
-        fig.colorbar(splt)  
+                pltuy[quivi,quivj]/pltspd[quivi,quivj])         
 
         #plot the streamline
         ax.streamplot(pltxx.transpose(), pltyy.transpose(), 
