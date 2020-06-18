@@ -157,15 +157,14 @@ if 0:
         fig = pl.figure(figsize=(12,6))
         ax = fig.gca()
         ax.set_aspect('equal')
+        #plot the speed
+        splt = ax.contourf(pltxx, pltyy, np.log(pltspd),alpha=0.4)
+        fig.colorbar(splt) 
 
         #plot the vector field
         ax.quiver(pltxx[quivi,quivj], pltyy[quivi,quivj], 
                 pltux[quivi,quivj]/pltspd[quivi,quivj], 
-                pltuy[quivi,quivj]/pltspd[quivi,quivj])
-
-        #plot the speed
-        splt = ax.contourf(pltxx, pltyy, np.log(pltspd))
-        fig.colorbar(splt)  
+                pltuy[quivi,quivj]/pltspd[quivi,quivj])         
 
         #plot the streamline
         ax.streamplot(pltxx.transpose(), pltyy.transpose(), 
