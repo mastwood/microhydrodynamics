@@ -10,7 +10,7 @@ import matplotlib.pyplot as pl
 import scipy.integrate as odes
 import quaternions
 import subprocess
-
+from scipy.spatial.transform import Rotation as Rrr
 #import StokesSingularities as ss 
 
 # grid setup
@@ -75,15 +75,18 @@ singularity_velocity2=np.vectorize(singularity_velocity20)
 
 stokeslet_vector = lambda x,t: stokeslet_vec(x,singularity_velocity(t))
 stokeslet_vector2 = lambda x,t: stokeslet_vec(x,singularity_velocity2(t))
+Rot0 = Rrr.from_quat([0, np.sin(np.pi/4), np.cos(np.pi/4),0]).as_matrix()
+print(Rrr.from_quat([0, np.sin(np.pi/4), np.cos(np.pi/4),0]))
+stokeslet_vectorRrr = lambda x,t: stokeslet_vec(np.matmul(Rot0,x),np.matmul(Rot0,singularity_velocity2(t)))
 
 #Solve ode
 def velocity(t,y):
     return stokeslet_vector(y-singularity_pos(t),t)
 def velocity2(t,y):
-    return stokeslet_vector2(y-singularity_pos2(t),t)-stokeslet_vector2(y+singularity_pos2(t+0.25),t)
+    return stokeslet_vector2(y-singularity_pos2(t),t)+stokeslet_vectorRrr(y-singularity_pos2(t+0.25),t)
 
 r=odes.ode(velocity2).set_integrator("lsoda")
-r.set_initial_value(np.array([5.0,0.0,0.0]),0.0)
+r.set_initial_value(np.array([0.0,5.0,0.0]),0.0)
 for i in range(len(list(TT))):
     x=np.array(r.integrate(r.t+dt))
     trajectory[i,:] = x
