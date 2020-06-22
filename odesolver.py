@@ -53,16 +53,16 @@ def velocity(t,y):
     return stokeslet_vector(y-singularity_pos(t),t)
 
 r=odes.ode(velocity).set_integrator("dopri5")
-r.set_initial_value(np.array([5.0,0.0,0.0]),0.0)
+r.set_initial_value(np.array([0.0,0.0,0.0]),0.0)
 for i in range(len(list(TT))):
     x=np.array(r.integrate(r.t+dt))
     trajectory[i,:] = x
 print(trajectory)
 from mpl_toolkits.mplot3d import Axes3D
 fig = pl.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot(trajectory[:,0],trajectory[:,1],trajectory[:,2])
-ax.plot(singularity_position[0]*np.ones_like(singularity_position[1]),singularity_position[1],singularity_position[2])
+ax = fig.add_subplot(111)
+ax.plot(trajectory[:,1],trajectory[:,2])
+ax.plot(singularity_position[1],singularity_position[2])
 pl.show()
 
 
