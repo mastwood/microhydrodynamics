@@ -38,8 +38,8 @@ def stresslet_vec(x, d, e):
     return (-6.0*(1.0/np.dot(x, x))**2*(1.0/np.linalg.norm(x))*np.dot(d,x)*np.dot(e,x)*x)
 
 
-tfinal=20
-dt=0.001
+tfinal=2000
+dt=1
 TT=np.arange(0,tfinal,dt) #main timeseries variable
 trajectory=np.empty((TT.size,3)) #trajectory of particle
 
@@ -83,10 +83,10 @@ stokeslet_vectorRrr = lambda x,t: stokeslet_vec(np.matmul(Rot0,x),np.matmul(Rot0
 def velocity(t,y):
     return stokeslet_vector(y-singularity_pos(t),t)
 def velocity2(t,y):
-    return stokeslet_vector2(y-singularity_pos2(t),t)+stokeslet_vectorRrr(y-singularity_pos2(t+0.25),t)
+    return stokeslet_vector2(y-singularity_pos2(t),t)+stokeslet_vectorRrr(y-singularity_pos2(t-0.25),t)
 
 r=odes.ode(velocity2).set_integrator("lsoda")
-r.set_initial_value(np.array([0.0,5.0,0.0]),0.0)
+r.set_initial_value(np.array([5.0,5.0,0.0]),0.0)
 for i in range(len(list(TT))):
     x=np.array(r.integrate(r.t+dt))
     trajectory[i,:] = x

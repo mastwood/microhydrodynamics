@@ -4,6 +4,7 @@ import sympy.diffgeom as diffg
 import numpy as np
 import sympy.vector as sv 
 from sympy.diffgeom.rn import R3_r
+import matplotlib.pyplot as pl
 
 x1,x2,x3 = sy.symbols('x_1 x_2 x_3',real=True)
 y1,y2,y3 = sy.symbols('y_1 y_2 y_3',real=True)
@@ -51,11 +52,33 @@ G32=G3.col(2)
 
 uvec1= a*sy.cos(theta_1)*G11-a*sy.sin(theta_1)*G10
 uvec2= a*sy.cos(theta_2)*G21-a*sy.sin(theta_2)*G20
-uvec3= a*sy.cos(theta_3)*G32-a*sy.sin(theta_3)*G31
 
-G = sy.Matrix([])
-G=G.col_insert(0,uvec1)
-G=G.col_insert(1,uvec2)
-G=G.col_insert(2,uvec3)
-print(sy.latex(G))
-print(sy.latex(sy.det(G)))
+G = sy.Matrix([[0,0],[0,0]])
+G[:,0]=uvec1[0:2]
+G[:,1]=uvec2[0:2]
+
+#G=G.col_insert(2,uvec3)
+
+#print(sy.latex(G))
+#print(sy.latex(sy.det(G)))
+
+Y1=5
+Y2=5
+TH1=np.arange(-np.pi,np.pi,0.1)
+TH2=np.arange(-np.pi,np.pi,0.1)
+T1,T2=np.meshgrid(TH1,TH2)
+A=1
+Eta=1
+Gfunc = np.vectorize(lambda theta1,theta2,yy1,yy2: sy.det(G.evalf(subs={y1:yy1,y2:yy2,theta_1:theta1,theta_2:theta2,a:A,eta:Eta})),excluded={y1,y2})
+
+for i in np.arange(-100,100,10):
+    Z=Gfunc(T1,T2,i,Y2)
+
+    fig, ax = pl.subplots()
+    CS = ax.contour(T1,T2,Z)
+    ax.clabel(CS, inline=1, fontsize=10)
+    ax.set_xlabel("theta_1")
+    ax.set_ylabel("theta_2")
+    pl.savefig("determinant_"+str(i)+".png")
+    pl.close()
+    print(i)
