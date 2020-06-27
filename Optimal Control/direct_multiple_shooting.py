@@ -7,22 +7,22 @@ Created on 2020-06-25
 from casadi import *
 
 T=10 # time horizon
-N=20 # control intervals
+N=10 # control intervals
 M=8  # rk4 steps per interval
 
 # Define variables and common expressions
 
 u1=MX.sym('u_1')
-u2=MX.sym('u_2') # control params = angular speed of active particle
-u=vertcat(u1,u2)
+u2=MX.sym('u_2') 
+u=vertcat(u1,u2) # control params = angular speed of active particle
 
 theta1=MX.sym('theta_1')
 theta2=MX.sym('theta_2')
 theta=vertcat(theta1,theta2)
 
 y1=MX.sym('y_1')
-y2=MX.sym('y_2') # passive params = position of passive particle
-y=vertcat(y1,y2)
+y2=MX.sym('y_2') 
+y=vertcat(y1,y2) # passive params = position of passive particle
 
 x11=cos(theta1)
 x12=sin(theta1)
