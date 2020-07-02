@@ -3,3 +3,6 @@ stokeslet_movie
 .vscode
 _pycache_
 *.pyc
+*.mp4
+Movies
+*.code-workspace

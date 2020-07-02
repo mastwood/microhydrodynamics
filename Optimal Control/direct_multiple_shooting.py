@@ -6,9 +6,9 @@ Created on 2020-06-25
 
 from casadi import *
 
-T=10 # time horizon
-N=10 # control intervals
-M=8  # rk4 steps per interval
+T=100 # time horizon
+N=100 # control intervals
+M=4  # rk4 steps per interval
 
 # Define variables and common expressions
 
@@ -40,8 +40,8 @@ v2=vertcat(v21,v22) # explicit velocity of active particles
 
 L= dot(v1,v1)+dot(v2,v2) # cost function (proportional to energy expended)
 
-G=6*pi*(v1+dot(y-x1,v1)*(y-x1)/dot(y-x1,y-x1))/sqrt(dot(y-x1,y-x1)) \
-    + 6*pi*(v2+dot(y-x2,v2)*(y-x2)/dot(y-x2,y-x2))/sqrt(dot(y-x2,y-x2))  #stokeslet
+G=(6*pi*(v1+dot(y-x1,v1)*(y-x1)/dot(y-x1,y-x1))/sqrt(dot(y-x1,y-x1)) \
+    + 6*pi*(v2+dot(y-x2,v2)*(y-x2)/dot(y-x2,y-x2))/sqrt(dot(y-x2,y-x2)))/(8*np.pi)  #stokeslet
 
 X=vertcat(theta1,theta2,y1,y2)  # configuration coordinates
 ydot=G # equations of motion
@@ -79,9 +79,9 @@ ubg = []
 # lift initial conditions
 Xk = MX.sym('X0', 4)
 w += [Xk]
-lbw += [0, pi/2, 0, 5]
-ubw += [0, pi/2, 0, 5]
-w0  += [0, pi/2, 0, 5]
+lbw += [0, pi/2, 0, 50]
+ubw += [0, pi/2, 0, 100]
+w0  += [0, pi/2, 0, 75]
 
 # generate multiple shooting constraints
 for k in range(N):
@@ -90,8 +90,8 @@ for k in range(N):
     # control variables
     Uk = MX.sym('U_' + str(k),2)
     w += [Uk]
-    lbw += [-inf,-inf]
-    ubw += [ inf, inf]
+    lbw += [-100,-100]
+    ubw += [ 100, 100]
     w0 += [0,0]
 
     # integrator
@@ -99,17 +99,12 @@ for k in range(N):
     Xk_end = Fk['xf']
     J  = J+Fk['qf']
 
-    # Prevent active particles from colliding
-    g+=[fabs(Xk_end[1]-Xk_end[0])]
-    lbg+=[0.01]
-    ubg+=[inf]
-
     # trajectory variables
     Xk = MX.sym('X_' + str(k+1), 4)
     w   += [Xk]
-    lbw += [-inf,-inf,-inf,-inf]
-    ubw += [ inf, inf, inf, inf]
-    w0  += [0, 0,0,0]
+    lbw += [0,0,50,50]
+    ubw += [2*np.pi,2*np.pi, 100, 100]
+    w0  += [0,np.pi/2,100,100]
 
     # equality constraint
     g+=[Xk_end-Xk]
@@ -117,10 +112,10 @@ for k in range(N):
     ubg+=[0,0,0,0]
 
 # boundary condition constraint
-g+=[Xk[3]-10]
+g+=[Xk[3]-90]
 lbg+=[0]
 ubg+=[0]
-g+=[Xk[2]+8]
+g+=[Xk[2]-90]
 lbg+=[0]
 ubg+=[0]
 
