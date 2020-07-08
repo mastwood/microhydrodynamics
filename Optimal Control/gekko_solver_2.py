@@ -9,29 +9,32 @@ from scipy.spatial.transform import Rotation as Rrr
 
 g=GEKKO(remote=True)
 
-nt =501 #number of timesteps
+nt =201 #number of timesteps
 g.time=np.linspace(0,100,nt)
 
 #STATUS = 1 implies that the variable is being optimized by the solver
 #DCOST is the amount which is added to the cost function when the variable is modified -> this prevents blowup
 
 # These are the coordinates of the passive particle
-y1=g.CV(value=-30)
+y1=g.CV(value=-5)
 y1.LOWER=-100
 y1.UPPER=100
-y2=g.CV(value=-30)
+y2=g.CV(value=-5)
 y2.LOWER=-100
 y2.UPPER=100
 
 x1=g.Var(value=1)
-x1.LOWER=-100
-x1.UPPER=100
+x1.LOWER=-1000
+x1.UPPER=1000
 x2=g.Var(value=0)
-x2.LOWER=-100
-x2.UPPER=100
+x2.LOWER=-1000
+x2.UPPER=1000
 v1=g.MV(value=0);v1.STATUS=1
+v1.LOWER=-1000
+v1.UPPER=1000
 v2=g.MV(value=0);v2.STATUS=1
-
+v2.LOWER=-1000
+v2.UPPER=1000
 def stokeslet(y1,y2,x1,x2,v1,v2):
     k=6*np.pi 
     r11=y1-x1
@@ -43,7 +46,7 @@ def stokeslet(y1,y2,x1,x2,v1,v2):
            ((r22*v2)*r21/(r21**2+r22**2))/g.sqrt(r21**2+r22**2)
     ydot2= ((r11*v1)*r12/(r11**2+r12**2))/g.sqrt(r11**2+r12**2)+\
            (v2+(r22*v2)*r22/(r21**2+r22**2))/g.sqrt(r21**2+r22**2)
-    return 1*k*np.array([ydot1,ydot2])/(8*np.pi)
+    return k*np.array([ydot1,ydot2])/(8*np.pi)
 
 # Dynamical constraints
 g.Equation(x1.dt()==v1)
@@ -59,11 +62,11 @@ g.Equation(J.dt()==v1**2+v2**2)
 final = g.Param(np.zeros(nt)); final[-1]=1
 g.Minimize(J*final)
 
-g.Minimize(final*1e5*(y1-30)**2)
-g.Minimize(final*1e5*(y2-30)**2)
+g.Minimize(final*1e5*(y1-3)**2)
+g.Minimize(final*1e5*(y2-3)**2)
 
 g.options.IMODE = 6  # optimal control
-g.options.NODES = 3  # collocation nodes
+g.options.NODES = 2  # collocation nodes
 g.options.SOLVER = 3 # solver
 g.options.MAX_ITER = 2000
 
@@ -118,7 +121,7 @@ def Lin_ODE(t,y,args):
     #contribution from first active particle
     y_velocity2=6*np.pi*stokeslet_vec([y0,y1-x2],[0,v2])
     #contribution from second active particle
-    return 100*(y_velocity1+y_velocity2)/(8*np.pi)
+    return (y_velocity1+y_velocity2)/(8*np.pi)
 
 def lin_solver(v1vals,v2vals,x1vals,x2vals,y0,tvals):
     dt=tvals[1]-tvals[0]
@@ -133,7 +136,7 @@ def lin_solver(v1vals,v2vals,x1vals,x2vals,y0,tvals):
     return trajectory
 
 fig2 = pl.figure()
-trajectory=lin_solver(v1.value,v2.value,x1.value,x2.value,[-30,-30],g.time)
+trajectory=lin_solver(v1.value,v2.value,x1.value,x2.value,[-5,-5],g.time)
 pl.plot(trajectory[:,0],trajectory[:,1], label = 'Actual Trajectory')
 pl.plot(y1.value,y2.value,label='Predicted Trajectory')
 pl.legend()
