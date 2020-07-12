@@ -66,7 +66,7 @@ g.Minimize(final*1e5*(y1-3)**2)
 g.Minimize(final*1e5*(y2-3)**2)
 
 g.options.IMODE = 6  # optimal control
-g.options.NODES = 2  # collocation nodes
+g.options.NODES = 10  # collocation nodes
 g.options.SOLVER = 3 # solver
 g.options.MAX_ITER = 2000
 
