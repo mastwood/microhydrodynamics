@@ -7,7 +7,7 @@ Created on 2020-06-25
 from casadi import *
 
 T=100 # time horizon
-N=30 # control intervals
+N=100 # control intervals
 M=4  # rk4 steps per interval
 
 # Define variables and common expressions
@@ -60,8 +60,8 @@ ubg = []
 # lift initial conditions
 Xk = MX.sym('X0', 6)
 w += [Xk]
-lbw += [-100,100,-100,100, 0, 0]
-ubw += [-100,100,-100,100, 10, 10]
+lbw += [-100,-100,-100,-100, -10, -10]
+ubw += [100,100,100,100, 10, 10]
 w0  += [0, 1,1,0, 3, 3]
 
 # generate multiple shooting constraints
@@ -73,24 +73,25 @@ for k in range(N):
     w += [Uk]
     lbw += [-100,-100,-100,-100]
     ubw += [ 100, 100,100,100]
-    w0 += [0,0,0,0]
+    w0  += [1,0,1,0]
 
     # integrator
     Fk = F(x0=Xk, p=Uk)
     Xk_end = Fk['xf']
     J  = J+Fk['qf']
 
-    # trajectory variables
-    Xk = MX.sym('X_' + str(k+1),6)
-    w   += [Xk]
-    lbw += [-100,-100,100,100,0,0]
-    ubw += [100,100,100,100,10, 10]
-    w0  += [0,0,0,0,90,90]
-
     # equality constraint
     g+=[Xk_end-Xk]
     lbg+=[0,0,0,0,0,0]
     ubg+=[0,0,0,0,0,0]
+
+    # trajectory variables
+    Xk  = MX.sym('X_' + str(k+1),6)
+    w   += [Xk]
+    lbw += [-100,-100,-100,-100,-10,-10]
+    ubw += [100,100,100,100,10, 10]
+    w0  += [0,1,1,0,3,3]
+
     # g+=[dot(Xk[[0,1]],Xk[[0,1]])-1]
     # lbg+=[-0.01]
     # ubg+=[0.01]
@@ -108,11 +109,11 @@ for k in range(N):
 
 # boundary condition constraint
 g+=[Xk[4]-4]
-lbg+=[-0.01]
-ubg+=[0.01]
+lbg+=[0]
+ubg+=[0]
 g+=[Xk[5]-4]
-lbg+=[-0.01]
-ubg+=[0.01]
+lbg+=[0]
+ubg+=[0]
 
 # Create an NLP solver
 print("Setting up NLP solver...")
@@ -122,20 +123,15 @@ solver = nlpsol('solver', 'ipopt', prob)
 # Solve the NLP
 print("Starting solver...")
 sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg)
-w_opt = sol['x']
+u_opt = sol['x']
 
 # Plot the solution
-u_opt = w_opt
-x_opt = [[0,0,0,0,75,75]]
+x_opt = [[0,1,1,0,3,3]]
 for k in range(N):
-    Fk = F(x0=x_opt[-1], p=u_opt[k])
+    Fk = F(x0=x_opt[-1], p=u_opt[k*10+6:k*10+9])
     x_opt += [Fk['xf'].full()]
 y1_opt = [r[4] for r in x_opt]
 y2_opt = [r[5] for r in x_opt]
-u1_opt = [r[0] for r in w_opt]
-u2_opt = [r[1] for r in w_opt]
-u3_opt = [r[2] for r in w_opt]
-u4_opt = [r[3] for r in w_opt]
 print(u_opt.shape)
 
 tgrid = [T/N*k for k in range(N+1)]
@@ -147,11 +143,11 @@ ax1.set_xlabel('t')
 ax1.grid()
 ax1.legend(['y1','y2'])
 
-ax2.step(tgrid, u1_opt, '-.')
-ax2.step(tgrid, u2_opt, '-.')
-ax2.step(tgrid, u3_opt, '-.')
-ax2.step(tgrid, u4_opt, '-.')
+ax2.plot(tgrid, vertcat(u_opt[6::10],[0]))
+ax2.plot(tgrid, vertcat(u_opt[7::10],[0]))
+ax2.plot(tgrid, vertcat(u_opt[8::10],[0]))
+ax2.plot(tgrid, vertcat(u_opt[9::10],[0]))
 ax2.set_xlabel('t')
-ax2.legend(['u1','u2'])
+ax2.legend(['u1','u2','u3','u4'])
 ax2.grid()
 plt.show()

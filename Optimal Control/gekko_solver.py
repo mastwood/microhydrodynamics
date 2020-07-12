@@ -22,11 +22,11 @@ u2.LOWER=-100
 u2.UPPER=100
 
 # These are the coordinates of the passive particle
-y1=g.CV(value=75)
-y1.LOWER=50
+y1=g.CV(value=0)
+y1.LOWER=-100
 y1.UPPER=100
-y2=g.CV(value=75)
-y2.LOWER=50
+y2=g.CV(value=5)
+y2.LOWER=-100
 y2.UPPER=100
 
 #Angular coordinates of the active particle
@@ -76,8 +76,8 @@ g.Equation(J.dt()==u1**2+u2**2)
 final = g.Param(np.zeros(nt)); final[-1]=1
 g.Minimize(J*final)
 
-g.Minimize(final*1e5*(y1-90)**2)
-g.Minimize(final*1e5*(y2-90)**2)
+g.Minimize(final*1e5*(y1-5)**2)
+g.Minimize(final*1e5*(y2+5)**2)
 
 g.options.IMODE = 6  # optimal control
 g.options.NODES = 4  # collocation nodes
@@ -181,7 +181,7 @@ def circ_solver(u1vals,u2vals,theta1vals,theta2vals,y0,tvals):
     return trajectory
 
 fig2 = pl.figure()
-trajectory=circ_solver(u1.value,u2.value,theta1.value,theta2.value,[75,75],g.time)
+trajectory=circ_solver(u1.value,u2.value,theta1.value,theta2.value,[0,5],g.time)
 pl.plot(trajectory[:,0],trajectory[:,1], label = 'Actual Trajectory')
 pl.plot(y1.value,y2.value,label='Predicted Trajectory')
 pl.legend()
