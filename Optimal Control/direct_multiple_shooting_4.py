@@ -21,9 +21,11 @@ u=vertcat(v1,v2)
 
 L= dot(u,u) # cost function (proportional to energy expended)
 
-G=(6*pi*(v1+dot(y-x1,v1)*(y-x1)/dot(y-x1,y-x1))/sqrt(dot(y-x1,y-x1)) \
-    + 6*pi*(v2+dot(y-x2,v2)*(y-x2)/dot(y-x2,y-x2))/sqrt(dot(y-x2,y-x2)))/(8*np.pi)  #stokeslet
-
+#G=(3/4)*((v1+dot(y-x1,v1)*(y-x1)/dot(y-x1,y-x1))/sqrt(dot(y-x1,y-x1)) \
+#    + (v2+dot(y-x2,v2)*(y-x2)/dot(y-x2,y-x2))/sqrt(dot(y-x2,y-x2)))  #stokeslet
+eps=1
+G=(3/4)*((v1+2*eps**2+dot(y-x1,v1)*(y-x1)/(dot(y-x1,y-x1)+eps**2))/sqrt(dot(y-x1,y-x1)+eps**2) \
+   + (v2+2*eps**2+dot(y-x2,v2)*(y-x2)/(dot(y-x2,y-x2)+eps**2))/sqrt(dot(y-x2,y-x2)+eps**2))  #stokeslet
 X=vertcat(x1,x2,y)  # configuration coordinates
 ydot=G # equations of motion
 

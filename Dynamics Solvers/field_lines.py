@@ -35,6 +35,18 @@ uzim = np.zeros_like(xx)
 q0 = np.hstack((np.cos(phi0/2),np.sin(phi0/2)*np.array([0,-1,0])))
 x0im = np.array([x0[0], x0[1], -x0[2]])
 
+
+def reg_stokeslet_vec(x, e):
+    # Spagnolie & Lauga 2012 notation
+    x=np.array(x)
+    e=np.array(e)
+    eps=1
+    rinvsq = 1.0/(np.dot(x,x)+eps**2)
+    xx=np.dot(x,x)
+
+    vec = (e*(xx+(2*eps**2)) + (np.dot(x,e)*x))*(rinvsq**(3/2))
+    return vec
+
 def velfield(x, x0, q, S):
     
     x0im = x0.copy()
@@ -66,7 +78,7 @@ def velfield(x, x0, q, S):
 
 
 
-if 1:  # Animation
+if 0:  # Animation
     tic=time.perf_counter()
     
     #Compute trajectory of particle under moving stokeslet flow
@@ -143,7 +155,7 @@ if 1:  # Animation
     toc=time.perf_counter()
     print(f'Completed in {toc-tic:0.4f} seconds')
 
-elif 0:  # Stresslet
+elif 1:  # Stresslet
     
     Fvec = np.array([0.0, 0.0, -1.0])
     evec = np.array([0.0, 0.0, 1.0])
@@ -156,7 +168,7 @@ elif 0:  # Stresslet
         X = np.array([xx.flat[i],yy.flat[i],zz.flat[i]])
         #mat = ss.stresslet_tens(x0, X)
         #vel = np.tensordot(Smat, mat)
-        vel = ss.stresslet_vec(X-x0, Flab, elab)
+        vel = reg_stokeslet_vec(X-x0, Flab)
         #display(vel - ss.stresslet_vec(X-x0, Fvec, evec))
         ux.flat[i] = vel[0]
         uy.flat[i] = vel[1]

@@ -22,13 +22,13 @@ r3vec=sy.Matrix([y1-a*sy.cos(theta_3),y2-a*sy.sin(theta_3),0])
 
 R1=r1vec.norm()
 rr1 = sy.tensorproduct(r1,r1)
-G1= (3/4)*eta*(rr1.tomatrix()/(R1**2)+sy.eye(3)/R1)
+G1= (3/4)*eta*(rr1.tomatrix()/(R1**3)+sy.eye(3)/R1)
 # +(1/8)*(eta**3)*(2*sy.eye(3)/(R**3)-6*rr.tomatrix()/(R**5))
 
 R2=r2vec.norm()
 rr2 = sy.tensorproduct(r2,r2)
 
-G2= (3/4)*eta*(rr2.tomatrix()/(R2**2)+sy.eye(3)/R2)
+G2= (3/4)*eta*(rr2.tomatrix()/(R2**3)+sy.eye(3)/R2)
 # +(1/8)*(eta**3)*(2*sy.eye(3)/(R**3)-6*rr.tomatrix()/(R**5))
 
 R3=r3vec.norm()
