@@ -6,3 +6,5 @@ _pycache_
 *.mp4
 Movies
 *.code-workspace
+mayavi/
+Matlab/OpenOCL/
