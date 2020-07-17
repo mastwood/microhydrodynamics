@@ -27,10 +27,10 @@ g.time=np.linspace(0,1000,nt)
 #DCOST is the amount which is added to the cost function when the variable is modified -> this prevents blowup
 
 # These are the coordinates of the passive particle
-y1=g.CV(value=-5)
+y1=g.CV(value=0)
 y1.LOWER=-100
 y1.UPPER=100
-y2=g.CV(value=-5)
+y2=g.CV(value=0)
 y2.LOWER=-100
 y2.UPPER=100
 

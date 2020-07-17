@@ -6,9 +6,9 @@ Created on 2020-06-25
 
 from casadi import *
 
-T=100 # time horizon
+T=MX.sym('T') # time horizon
 N=100 # control intervals
-M=4  # rk4 steps per interval
+M=8  # rk4 steps per interval
 
 # Define variables and common expressions
 
@@ -58,6 +58,10 @@ g=[]
 lbg = []
 ubg = []
 
+w+=[T]
+lbw+=[1]
+ubw+=[1]
+w0+=[1]
 
 # lift initial conditions
 Xk = MX.sym('X0', 6)
@@ -65,18 +69,15 @@ w += [Xk]
 lbw += [-100,-100,-100,-100, -10, -10]
 ubw += [100,100,100,100, 10, 10]
 w0  += [0, 1,1,0, 3, 3]
-
+# control variables
+Uk = MX.sym('U0',4)
+w += [Uk]
+lbw += [-100,-100,-100,-100]
+ubw += [ 100, 100,100,100]
+w0  += [0,0,0,0]
 # generate multiple shooting constraints
 for k in range(N):
     print("Generating problem... ",k)
-
-    # control variables
-    Uk = MX.sym('U_' + str(k),4)
-    w += [Uk]
-    lbw += [-100,-100,-100,-100]
-    ubw += [ 100, 100,100,100]
-    w0  += [1,0,1,0]
-
     # integrator
     Fk = F(x0=Xk, p=Uk)
     Xk_end = Fk['xf']
@@ -93,19 +94,25 @@ for k in range(N):
     lbw += [-100,-100,-100,-100,-10,-10]
     ubw += [100,100,100,100,10, 10]
     w0  += [0,1,1,0,3,3]
+    # control variables
+    Uk = MX.sym('U_' + str(k),4)
+    w += [Uk]
+    lbw += [-100,-100,-100,-100]
+    ubw += [ 100, 100,100,100]
+    w0  += [0,0,0,0]
 
-    # g+=[dot(Xk[[0,1]],Xk[[0,1]])-1]
-    # lbg+=[-0.01]
-    # ubg+=[0.01]
-    # g+=[dot(Xk[[2,3]],Xk[[2,3]])-1]
-    # lbg+=[-0.01]
-    # ubg+=[0.01]
-    # g+=[dot(Xk[[0,1]],Uk[[0,1]])-1]
-    # lbg+=[-0.01]
-    # ubg+=[0.01]
-    # g+=[dot(Xk[[2,3]],Uk[[2,3]])-1]
-    # lbg+=[-0.01]
-    # ubg+=[0.01]
+    g+=[Xk[0]**2+Xk[1]**2-1]
+    lbg+=[0]
+    ubg+=[0]
+    g+=[Xk[2]**2+Xk[3]**2-1]
+    lbg+=[0]
+    ubg+=[0]
+    g+=[Xk[0]*Uk[0]+Xk[1]*Uk[1]]
+    lbg+=[0]
+    ubg+=[0]
+    g+=[Xk[2]*Uk[2]+Xk[3]*Uk[3]]
+    lbg+=[0]
+    ubg+=[0]
 
 
 
@@ -125,31 +132,36 @@ solver = nlpsol('solver', 'ipopt', prob)
 # Solve the NLP
 print("Starting solver...")
 sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg)
-u_opt = sol['x']
+u_opt = sol['x'][1::]
 
-# Plot the solution
-x_opt = [[0,1,1,0,3,3]]
-for k in range(N):
-    Fk = F(x0=x_opt[-1], p=u_opt[k*10+6:k*10+9])
-    x_opt += [Fk['xf'].full()]
-y1_opt = [r[4] for r in x_opt]
-y2_opt = [r[5] for r in x_opt]
-print(u_opt.shape)
+# # Plot the solution
+# x_opt = [[0,1,1,0,3,3]]
+# for k in range(N):
+#     Fk = F(x0=x_opt[-1], p=u_opt[k*10+6:k*10+10])
+#     x_opt += [Fk['xf'].full()]
+y1_opt = u_opt[4::10] #[r[4] for r in x_opt]
+y2_opt = u_opt[5::10] #[r[5] for r in x_opt]
 
-tgrid = [T/N*k for k in range(N+1)]
+tgrid = [sol['x'][0]/N*k for k in range(N+1)]
 import matplotlib.pyplot as plt
-fig,(ax1,ax2)=plt.subplots(2)
+fig,(ax1,ax2,ax3)=plt.subplots(3)
 ax1.plot(tgrid, y1_opt)
 ax1.plot(tgrid, y2_opt)
 ax1.set_xlabel('t')
 ax1.grid()
 ax1.legend(['y1','y2'])
 
-ax2.plot(tgrid, vertcat(u_opt[6::10],[0]))
-ax2.plot(tgrid, vertcat(u_opt[7::10],[0]))
-ax2.plot(tgrid, vertcat(u_opt[8::10],[0]))
-ax2.plot(tgrid, vertcat(u_opt[9::10],[0]))
+ax2.plot(tgrid, u_opt[6::10])
+ax2.plot(tgrid, u_opt[7::10])
+ax2.plot(tgrid, u_opt[8::10])
+ax2.plot(tgrid, u_opt[9::10])
+
 ax2.set_xlabel('t')
 ax2.legend(['u1','u2','u3','u4'])
+
+ax3.plot(u_opt[0::10], u_opt[1::10])
+ax3.plot(u_opt[2::10], u_opt[3::10])
+ax3.legend(['x1','x2'])
+
 ax2.grid()
 plt.show()
