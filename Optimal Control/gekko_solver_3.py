@@ -122,6 +122,8 @@ def blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
     r12=y2-x12
     r21=y1-x21
     r22=y2-x22
+    v1v1=g.sqrt(v11**2+v12**2)
+    v2v2=g.sqrt(v21**2+v22**2)
     rinvsq1=1/(r11**2+r12**2)
     rinv1=rinvsq1**0.5
     rinvsq2=1/(r21**2+r22**2)
@@ -143,8 +145,8 @@ def blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
     r_imv2=r_im21*v21+r_im22*v22
     stokeslet_im1=r_iminv1*(v11+r_imv1*r_im11*r_iminvsq1)+r_iminv2*(v21+r_imv2*r_im21*r_iminvsq2) 
     stokeslet_im2=r_iminv1*(v12+r_imv1*r_im12*r_iminvsq1)+r_iminv2*(v22+r_imv2*r_im22*r_iminvsq2)
-    dipole_im1=2*x12*r_iminvsq1*(r_im11*r_iminv1+3*r_im12**2*r_im11*r_iminv1**3)+2*x22*r_iminvsq2*(r_im21*r_iminv2+3*r_im22**2*r_im21*r_iminv2**3)
-    dipole_im2=2*x12*r_iminvsq1*(r_im12*r_iminv1+3*r_im12**2*r_im12*r_iminv1**3)+2*x22*r_iminvsq2*(r_im22*r_iminv2+3*r_im22**2*r_im22*r_iminv2**3)
+    dipole_im1=-2*x12*r_iminvsq1*(v1v1*r_im11*r_iminv1-3*r_imv1*r_im11*r_iminv1**3)+2*x22*r_iminvsq2*(v2v2*r_im21*r_iminv2+3*r_imv2*r_im21*r_iminv2**3)
+    dipole_im2=-2*x12*r_iminvsq1*(v1v1*r_im12*r_iminv1-3*r_imv1*r_im12*r_iminv1**3)+2*x22*r_iminvsq2*(v2v2*r_im22*r_iminv2+3*r_imv2*r_im22*r_iminv2**3)
     doublet_im1=2*x12**2*r_iminv1**3*(3*(r_imv1*r_im11)*r_iminvsq1-v11)+2*x22**2*r_iminv2**3*(3*(r_imv2*r_im21)*r_iminvsq2-v21)
     doublet_im2=2*x12**2*r_iminv1**3*(3*(r_imv1*r_im12)*r_iminvsq1-v12)+2*x22**2*r_iminv2**3*(3*(r_imv2*r_im22)*r_iminvsq2-v22)
     return 0.25*(3/4)*np.array([stokeslet1+stokeslet_im1+dipole_im1+doublet_im1,stokeslet2+stokeslet_im2+dipole_im2+doublet_im2])
