@@ -85,12 +85,12 @@ def blakelet_vec(x,d,e,h):
     if mode=='3d':
         hvec=np.array([0,0,h])
         x_prime = x-2*hvec
-        vec = stokeslet_vec(x,e)-stokeslet_vec(x_prime,e)+2*h*stokesletdipole_vec(x_prime,d,e)+2*h**2*sourcedoublet_vec(x_prime,e)
+        vec = stokeslet_vec(x,e)-stokeslet_vec(x_prime,e)+2*x[2]*stokesletdipole_vec(x_prime,d,e)+2*x[2]**2*sourcedoublet_vec(x_prime,e)
         return vec
     if mode=='2d':
         hvec=np.array([0,h])
-        x_prime = x-2*hvec
-        vec = stokeslet_vec(x,e)-stokeslet_vec(x_prime,e)+2*h*stokesletdipole_vec(x_prime,d,e)+2*h**2*sourcedoublet_vec(x_prime,e)
+        x_prime = x-2*h
+        vec = stokeslet_vec(x,e)-stokeslet_vec(x_prime,e)+2*x[1]*stokesletdipole_vec(x_prime,d,e)+2*x[1]**2*sourcedoublet_vec(x_prime,e)
         return vec
     
 

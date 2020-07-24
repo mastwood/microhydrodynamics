@@ -5,25 +5,13 @@ import matplotlib.colors as colors
 import subprocess
 import time 
 import scipy.integrate as odes
-import subprocess
-from scipy.spatial.transform import Rotation as Rrr
+from StokesSingularities import *
 
 IV=[5,5] #Initial position
 
-def reg_stokeslet_vec(x, e):
-    # Spagnolie & Lauga 2012 notation
-    x=np.array(x)
-    e=np.array(e)
-    eps=0.1
-    rinvsq = 1.0/(np.dot(x,x)+eps**2)
-    xx=np.dot(x,x)
-
-    vec = 0.1*(e*(xx+(2*eps**2)) + (np.dot(x,e)*x))*(rinvsq**(3/2))
-    return vec
-
 g=GEKKO(remote=True)
 
-nt = 1001 #number of timesteps
+nt = 501 #number of timesteps
 g.time=np.linspace(0,100,nt)
 
 #STATUS = 1 implies that the variable is being optimized by the solver
@@ -37,17 +25,19 @@ y2=g.CV(value=IV[1])
 y2.LOWER=-100
 y2.UPPER=100
 
-MODE=1
-if MODE==1:
-    x11=g.Var(value=5,lb=0)
-    x12=g.Var(value=0,lb=0)
+MODE='CARTES'
+
+# This mode is for cartesian coordinates
+if MODE=='CARTES': 
+    x11=g.Var(value=0,lb=0)
+    x12=g.Var(value=1,lb=0)
     x21=g.Var(value=0,lb=0)
     x22=g.Var(value=0,lb=0)
 
     v11=g.MV(value=0);v11.STATUS=1
     v12=g.MV(value=0);v12.STATUS=1
-    v21=g.MV(value=0);v21.STATUS=1
-    v22=g.MV(value=0);v22.STATUS=1
+    v21=g.MV(value=0);v21.STATUS=0
+    v22=g.MV(value=0);v22.STATUS=0
 
     v11.LOWER=-10
     v11.UPPER=10
@@ -62,7 +52,9 @@ if MODE==1:
     g.Equation(x12.dt()==v12)
     g.Equation(x21.dt()==v21)
     g.Equation(x22.dt()==v22)
-if MODE==0:
+
+# Polar Coordinates
+if MODE=='POLAR':
     theta1=g.Var(value=0)
     theta2=g.Var(value=np.pi/2)
 
@@ -88,6 +80,7 @@ if MODE==0:
     g.Equation(theta1.dt()==theta1dot)
     g.Equation(theta2.dt()==theta2dot)
 
+# Stokeslet fundamental solution.
 def stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
     r11=y1-x11
     r12=y2-x12
@@ -133,11 +126,33 @@ def blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
     rinv1=rinvsq1**0.5
     rinvsq2=1/(r21**2+r22**2)
     rinv2=rinvsq2**0.5 
+    rv1=r11*v11+r12*v12 
+    rv2=r21*v21+r22*v22
+    stokeslet1=rinv1*(v11+rv1*r11*rinvsq1)+rinv2*(v21+rv2*r21*rinvsq2) 
+    stokeslet2=rinv1*(v12+rv1*r12*rinvsq1)+rinv2*(v22+rv2*r22*rinvsq2)
+    
+    r_im11=y1-x11
+    r_im12=y2+x12
+    r_im21=y1-x21
+    r_im22=y2+x22
+    r_iminvsq1=1/(r_im11**2+r_im12**2)
+    r_iminv1=r_iminvsq1**0.5
+    r_iminvsq2=1/(r_im21**2+r_im22**2)
+    r_iminv2=r_iminvsq2**0.5 
+    r_imv1=r_im11*v11+r_im12*v12 
+    r_imv2=r_im21*v21+r_im22*v22
+    stokeslet_im1=r_iminv1*(v11+r_imv1*r_im11*r_iminvsq1)+r_iminv2*(v21+r_imv2*r_im21*r_iminvsq2) 
+    stokeslet_im2=r_iminv1*(v12+r_imv1*r_im12*r_iminvsq1)+r_iminv2*(v22+r_imv2*r_im22*r_iminvsq2)
+    dipole_im1=2*x12*r_iminvsq1*(r_im11*r_iminv1+3*r_im12**2*r_im11*r_iminv1**3)+2*x22*r_iminvsq2*(r_im21*r_iminv2+3*r_im22**2*r_im21*r_iminv2**3)
+    dipole_im2=2*x12*r_iminvsq1*(r_im12*r_iminv1+3*r_im12**2*r_im12*r_iminv1**3)+2*x22*r_iminvsq2*(r_im22*r_iminv2+3*r_im22**2*r_im22*r_iminv2**3)
+    doublet_im1=2*x12**2*r_iminv1**3*(3*(r_imv1*r_im11)*r_iminvsq1-v11)+2*x22**2*r_iminv2**3*(3*(r_imv2*r_im21)*r_iminvsq2-v21)
+    doublet_im2=2*x12**2*r_iminv1**3*(3*(r_imv1*r_im12)*r_iminvsq1-v12)+2*x22**2*r_iminv2**3*(3*(r_imv2*r_im22)*r_iminvsq2-v22)
+    return 0.25*(3/4)*np.array([stokeslet1+stokeslet_im1+dipole_im1+doublet_im1,stokeslet2+stokeslet_im2+dipole_im2+doublet_im2])
 
 # Dynamical constraints
 
-g.Equation(y1.dt()==regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22)[0])
-g.Equation(y2.dt()==regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22)[1])
+g.Equation(y1.dt()==blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22)[0])
+g.Equation(y2.dt()==blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22)[1])
 
 # Cost function
 J=g.Var(value=0)
@@ -148,10 +163,10 @@ final = g.Param(np.zeros(nt)); final[-1]=1
 g.Minimize(J*final)
 #g.Equation(1e3*g.exp(-((y1-x11)**2+(y2-x22)**2+(y1-x21)**2+(y2-x22)**2)) < 1)
 g.Minimize(final*1e5*(y1-3)**2)
-g.Minimize(final*1e5*(y2-6)**2)
+g.Minimize(final*1e5*(y2-3)**2)
 
 g.options.IMODE = 6  # optimal control
-g.options.NODES = 30  # collocation nodes
+g.options.NODES = 10  # collocation nodes
 g.options.SOLVER = 3 # solver
 g.options.MAX_ITER = 10000
 g.solver_options={'print_info_string yes'}
@@ -180,21 +195,26 @@ ax3.plot(y1.value,y2.value,label='trajectory')
 counter=0
 xx, yy = np.mgrid[0:10:31j,
                   0:10:31j]
-
+def filt(x):
+    if x>=1:
+        return 1
+    else:
+        return x
 while counter < len(g.time):   
     ux = np.zeros_like(xx)
     uy = np.zeros_like(xx)
     uu=np.zeros_like(xx)
-    for i in range(xx.size):
-        X = np.array([xx.flat[i],yy.flat[i]])
-        #mat = ss.stresslet_tens(x0, X)
-        #vel = np.tensordot(Smat, mat)
-        vel = (3/4)*reg_stokeslet_vec(X-np.array([x11.value[counter],x12.value[counter]]), [v11.value[counter],v12.value[counter]])+\
-              (3/4)*reg_stokeslet_vec(X-np.array([x21.value[counter],x22.value[counter]]), [v21.value[counter],v22.value[counter]])
-        #display(vel - ss.stresslet_vec(X-x0, Fvec, evec))
-        ux.flat[i] = vel[0]
-        uy.flat[i] = vel[1]
-        uu.flat[i] = vel[0]**2+vel[1]**2+1e-5
+    for i in range(g.time.size):
+        for j in range(g.time.size):
+            X = np.array([xx[i,j],yy[i,j]])
+            #mat = ss.stresslet_tens(x0, X)
+            #vel = np.tensordot(Smat, mat)
+            vel = 0.25*(3/4)*blakelet_vec(X-np.array([x11.value[counter],x12.value[counter]]), [v11.value[counter],v12.value[counter]],x12.value[counter])+\
+                0.25*(3/4)*blakelet_vec(X-np.array([x21.value[counter],x22.value[counter]]), [v21.value[counter],v22.value[counter]],x22.value[counter])
+            #display(vel - ss.stresslet_vec(X-x0, Fvec, evec))
+            ux[i,j] = vel[0]
+            uy[i,j] = vel[1]
+            uu[i,j] = filt(vel[0]**2+vel[1]**2)
     fig = pl.figure()
 
     ax = fig.add_subplot(111)
@@ -226,9 +246,9 @@ def Lin_ODE(t,y,args):
     v11,v12,v21,v22,x11,x12,x21,x22=args
     y1=y[0]
     y2=y[1]
-    y_velocity1=(3/4)*reg_stokeslet_vec([y1-x11,y2-x12],[v11,v12])
+    y_velocity1=(3/4)*blakelet_vec([y1-x11,y2-x12],[v11,v12],[-v11,-v12],x12)
     #contribution from first active particle
-    y_velocity2=(3/4)*reg_stokeslet_vec([y1-x21,y2-x22],[v21,v22])
+    y_velocity2=(3/4)*blakelet_vec([y1-x21,y2-x22],[v21,v22],[-v21,-v22],x22)
     #contribution from second active particle
     return y_velocity1+y_velocity2
 
