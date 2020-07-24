@@ -43,8 +43,8 @@ u2 = G2*v2
 G=sy.Matrix([[0,0],[0,0]])
 G[:,0]=u1 
 G[:,1]=u2 
-detG3=sy.det(G) 
-print(sy.latex(detG3))
+# detG3=sy.det(G) 
+# print(sy.latex(detG3))
 
 
 def _detG(y1,y2,x1,x2):
@@ -59,6 +59,16 @@ def _detG(y1,y2,x1,x2):
     C=np.matmul(G1,np.matrix([[1,0],[0,0]]))+np.matmul(G2,np.matrix([[0,0],[0,1]]))
     return nplg.det(C)
 detG=np.vectorize(_detG,excluded={0,1})
+
+def _detG3(y1,y2,x1,x2):
+    r1=np.array([y1-x1,y2])
+    r2=np.array([y1,y2-x2])
+    R1=nplg.norm(r1)
+    R2=nplg.norm(r2)
+    det = np.log((R2**(3/2)*r1[0]**2+R2)*(R1**(3/2)*r2[1]**2+R1)-r1[0]*r1[1]*r2[0]*r1[1])
+    return det
+detG3=np.vectorize(_detG3,excluded={0,1})
+
 
 def _detG2(y1,x1,x2):
     return fsolve(lambda y2: ((x1-y1)**2+np.sqrt((y1-x2)**2+y2**2))*((x2-y2)**2+np.sqrt((y2-x2)**2+y1**2)-(y1-x1)*(y2-x2)*y1*y2),0)
@@ -80,35 +90,44 @@ if mode==0:
     pl.plot()
 
 
+    X1,X2=np.meshgrid(Xx1,Xx2)
+    fig,ax=pl.subplot(1)
+
+
+
 if mode==1:
     X1,X2=np.meshgrid(Xx1,Xx2)
-    fig, axes = pl.subplots(3,3,sharex=True,sharey=True)
+    fig, axes = pl.subplots(5,5,sharex=True,sharey=True)
     fig.subplots_adjust(hspace=0,wspace=0)
     matplotlib.rcParams['contour.negative_linestyle'] = 'solid'
 
     counter=0
-    for i in np.arange(-2,2,1):
-        for j in np.arange(-2,2,1):
+    for i in np.arange(-2,3,1):
+        for j in np.arange(-2,3,1):
             a=4-(i+2)
             b=j+2
             axes[a,b].clear()
 
-            Z=detG(i,j,X1,X2)
-            CS = axes[a,b].pcolormesh(X1,X2,Z,vmin=0,vmax=1)
+            Z=detG3(i,j,X1,X2)
+            CS = axes[a,b].pcolormesh(X1,X2,Z)
             CS2 = axes[a,b].contour(X1,X2,Z,colors='w')
 
             #CS = axes[a,b].contour(X1,X2,Z,colors='r',linestyles='dotted',levels=[-0.01,0.01])
 
-            axes[a,b].clabel(CS2, inline=1, fontsize=10)
+            axes[a,b].clabel(CS2, inline=1, fontsize=8)
             #pl.savefig('lin_det_'+('%03d'%counter)+'.png')
             print([i,j])
 
-    axes[2,0].set_xlabel(r'$x_1 \in [-5,5],  y_1=1$')
-    axes[2,1].set_xlabel(r'$x_1 \in [-5,5],  y_1=2$')
-    axes[2,2].set_xlabel(r'$x_1 \in [-5,5],  y_1=3$')
-    axes[0,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=3$')
-    axes[1,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=2$')
-    axes[2,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=1$')
+    axes[4,0].set_xlabel(r'$x_1 \in [-10,10],  y_1=-2$')
+    axes[4,1].set_xlabel(r'$x_1 \in [-10,10],  y_1=-1$')
+    axes[4,2].set_xlabel(r'$x_1 \in [-10,10],  y_1=0$')
+    axes[4,3].set_xlabel(r'$x_1 \in [-10,10],  y_1=1$')
+    axes[4,4].set_xlabel(r'$x_1 \in [-10,10],  y_1=2$')
+    axes[0,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=-2$')
+    axes[1,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=-1$')
+    axes[2,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=0$')
+    axes[3,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=1$')
+    axes[4,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=2$')
 
     fig.colorbar(CS,ax=axes.ravel().tolist())
     pl.show()

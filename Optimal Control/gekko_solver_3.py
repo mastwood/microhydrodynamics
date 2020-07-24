@@ -1,11 +1,14 @@
 from gekko import GEKKO
 import numpy as np
 import matplotlib.pyplot as pl
+import matplotlib.colors as colors
 import subprocess
 import time 
 import scipy.integrate as odes
 import subprocess
 from scipy.spatial.transform import Rotation as Rrr
+
+IV=[5,5] #Initial position
 
 def reg_stokeslet_vec(x, e):
     # Spagnolie & Lauga 2012 notation
@@ -15,45 +18,45 @@ def reg_stokeslet_vec(x, e):
     rinvsq = 1.0/(np.dot(x,x)+eps**2)
     xx=np.dot(x,x)
 
-    vec = 10*(e*(xx+(2*eps**2)) + (np.dot(x,e)*x))*(rinvsq**(3/2))
+    vec = 0.1*(e*(xx+(2*eps**2)) + (np.dot(x,e)*x))*(rinvsq**(3/2))
     return vec
 
 g=GEKKO(remote=True)
 
-nt =400 #number of timesteps
-g.time=np.linspace(0,1000,nt)
+nt = 1001 #number of timesteps
+g.time=np.linspace(0,100,nt)
 
 #STATUS = 1 implies that the variable is being optimized by the solver
 #DCOST is the amount which is added to the cost function when the variable is modified -> this prevents blowup
 
 # These are the coordinates of the passive particle
-y1=g.CV(value=0)
+y1=g.CV(value=IV[0])
 y1.LOWER=-100
 y1.UPPER=100
-y2=g.CV(value=0)
+y2=g.CV(value=IV[1])
 y2.LOWER=-100
 y2.UPPER=100
 
 MODE=1
 if MODE==1:
-    x11=g.Var(value=1)
-    x12=g.Var(value=0)
-    x21=g.Var(value=0)
-    x22=g.Var(value=1)
+    x11=g.Var(value=5,lb=0)
+    x12=g.Var(value=0,lb=0)
+    x21=g.Var(value=0,lb=0)
+    x22=g.Var(value=0,lb=0)
 
     v11=g.MV(value=0);v11.STATUS=1
     v12=g.MV(value=0);v12.STATUS=1
-    v21=g.MV(value=0);v21.STATUS=0
-    v22=g.MV(value=0);v22.STATUS=0
+    v21=g.MV(value=0);v21.STATUS=1
+    v22=g.MV(value=0);v22.STATUS=1
 
-    v11.LOWER=-100
-    v11.UPPER=100
-    v12.LOWER=-100
-    v12.UPPER=100
-    v21.LOWER=-100
-    v21.UPPER=100
-    v22.LOWER=-100
-    v22.UPPER=100
+    v11.LOWER=-10
+    v11.UPPER=10
+    v12.LOWER=-10
+    v12.UPPER=10
+    v21.LOWER=-10
+    v21.UPPER=10
+    v22.LOWER=-10
+    v22.UPPER=10
 
     g.Equation(x11.dt()==v11)
     g.Equation(x12.dt()==v12)
@@ -98,9 +101,9 @@ def stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
     rv2=r21*v21+r22*v22
     ydot1=rinv1*(v11+rv1*r11*rinvsq1)+rinv2*(v21+rv2*r21*rinvsq2) 
     ydot2=rinv1*(v12+rv1*r12*rinvsq1)+rinv2*(v22+rv2*r22*rinvsq2)
-    return 10*np.array([ydot1,ydot2])*3/4
+    return 0.1*np.array([ydot1,ydot2])*3/4
 def regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
-    e=0.01
+    e=0.1
     r11=y1-x11
     r12=y2-x12
     r21=y1-x21
@@ -119,7 +122,18 @@ def regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
         + (rinvsq2**(3/2))*(r2r2*v21+2*(e**2)*v21+r2v2*r21)
     ydot2=(rinvsq1**(3/2))*(r1r1*v12+2*(e**2)*v12+r1v1*r12) \
         + (rinvsq2**(3/2))*(r2r2*v22+2*(e**2)*v22+r2v2*r22)
-    return (3/4)*np.array([ydot1,ydot2])
+    return 0.1*(3/4)*np.array([ydot1,ydot2])
+
+def blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
+    r11=y1-x11
+    r12=y2-x12
+    r21=y1-x21
+    r22=y2-x22
+    rinvsq1=1/(r11**2+r12**2)
+    rinv1=rinvsq1**0.5
+    rinvsq2=1/(r21**2+r22**2)
+    rinv2=rinvsq2**0.5 
+
 # Dynamical constraints
 
 g.Equation(y1.dt()==regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22)[0])
@@ -128,18 +142,18 @@ g.Equation(y2.dt()==regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22)
 # Cost function
 J=g.Var(value=0)
 
-g.Equation(J.dt()==v11**2+v12**2+v21**2+v22**2)
+g.Equation(J==g.integral(v11**2+v12**2+v21**2+v22**2))
 
 final = g.Param(np.zeros(nt)); final[-1]=1
-#g.Minimize(J*final)
-
-g.Minimize(final*1e5*(y1-5)**2)
-g.Minimize(final*1e5*(y2-5)**2)
+g.Minimize(J*final)
+#g.Equation(1e3*g.exp(-((y1-x11)**2+(y2-x22)**2+(y1-x21)**2+(y2-x22)**2)) < 1)
+g.Minimize(final*1e5*(y1-3)**2)
+g.Minimize(final*1e5*(y2-6)**2)
 
 g.options.IMODE = 6  # optimal control
 g.options.NODES = 30  # collocation nodes
 g.options.SOLVER = 3 # solver
-g.options.MAX_ITER = 2000
+g.options.MAX_ITER = 10000
 g.solver_options={'print_info_string yes'}
 
 g.options.COLDSTART = 1
@@ -164,28 +178,30 @@ fig2,ax3=pl.subplots(1)
 ax3.plot(y1.value,y2.value,label='trajectory')
 #pl.show()
 counter=0
-xx, yy = np.mgrid[-10:10:31j,
-                  -10:10:31j]
+xx, yy = np.mgrid[0:10:31j,
+                  0:10:31j]
 
 while counter < len(g.time):   
     ux = np.zeros_like(xx)
     uy = np.zeros_like(xx)
-
+    uu=np.zeros_like(xx)
     for i in range(xx.size):
         X = np.array([xx.flat[i],yy.flat[i]])
         #mat = ss.stresslet_tens(x0, X)
         #vel = np.tensordot(Smat, mat)
-        vel = reg_stokeslet_vec(X-np.array([x11.value[counter],x12.value[counter]]), [v11.value[counter],v12.value[counter]])+\
-              reg_stokeslet_vec(X-np.array([x21.value[counter],x22.value[counter]]), [v21.value[counter],v22.value[counter]])
+        vel = (3/4)*reg_stokeslet_vec(X-np.array([x11.value[counter],x12.value[counter]]), [v11.value[counter],v12.value[counter]])+\
+              (3/4)*reg_stokeslet_vec(X-np.array([x21.value[counter],x22.value[counter]]), [v21.value[counter],v22.value[counter]])
         #display(vel - ss.stresslet_vec(X-x0, Fvec, evec))
         ux.flat[i] = vel[0]
         uy.flat[i] = vel[1]
-    
+        uu.flat[i] = vel[0]**2+vel[1]**2+1e-5
     fig = pl.figure()
 
     ax = fig.add_subplot(111)
     
-    ax.streamplot(xx[:,0],yy[0,:],ux,uy, color='k',linewidth=0.3)
+    Q=ax.quiver(xx.T[:,0],yy.T[0,:],ux.T,uy.T,uu.T,cmap='autumn',
+           norm=colors.LogNorm(vmin=uu.min(),vmax=uu.max()),scale=2)
+    fig.colorbar(Q,extend='max')
     ax.set_xlabel('x')
     ax.set_ylabel('y')
     ax.plot(y1.value[0:counter],y2.value[0:counter], label='Passive')
@@ -229,7 +245,7 @@ def lin_solver(v11vals,v12vals,v21vals,v22vals,x11vals,x12vals,x21vals,x22vals,y
     return trajectory
 
 fig2 = pl.figure()
-trajectory=lin_solver(v11.value,v12.value,v21.value,v22.value,x11.value,x12.value,x21.value,x22.value,[-5,-5],g.time)
+trajectory=lin_solver(v11.value,v12.value,v21.value,v22.value,x11.value,x12.value,x21.value,x22.value,IV,g.time)
 pl.plot(trajectory[:,0],trajectory[:,1], label = 'Actual Trajectory')
 pl.plot(y1.value,y2.value,label='Predicted Trajectory')
 pl.legend()

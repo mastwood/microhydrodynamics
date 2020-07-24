@@ -78,6 +78,29 @@ def stresslet_vec(x, d, e):
     
     return vec
 
+def stokesletim_vec(x,d,e, mode='3d'):
+    # Spagnolie & Lauga 2012 notation
+    # No slip plane boundary at z=0. h is z co-ordinate of stokeslet
+    if mode=='3d':
+        h=np.array([0,0,x[2]])
+        x_prime = x-2*h
+        vec = stokeslet_vec(x,e)-stokeslet_vec(x_prime,e)+2*x[2]*stokesletdipole_vec(x_prime,d,e)+2*x[2]**2*sourcedoublet_vec(x_prime,e)
+        return vec
+    if mode=='2d':
+        h=np.array([0,x[1])
+        x_prime = x-2*h
+        vec = stokeslet_vec(x,e)-stokeslet_vec(x_prime,e)+2*x[1]*stokesletdipole_vec(x_prime,d,e)+2*x[1]**2*sourcedoublet_vec(x_prime,e)
+        return vec
+    
+def sphere_vec(x, e):
+    # Spagnolie & Lauga 2012 notation
+    rinvsq = 1.0/np.dot(x, x)
+    rinv = 1.0/np.linalg.norm(x)
+    
+    vec = (3/4)*rinv*(e + np.dot(x,e)*x*rinvsq) + (1/8)*(2*e*rinv**3-6*np.dot(x,e)*x*rinv**5)
+    
+    return vec
+
 def stressletim_vec(x, d, e, h):
     # Spagnolie & Lauga 2012 notation
     # No slip plane boundary at z=0. h is z co-ordinate of stresslet
