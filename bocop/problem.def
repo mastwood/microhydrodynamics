@@ -1,0 +1,66 @@
+# This file defines all dimensions and parameters
+# values for your problem :
+
+# Initial and final time :
+time.free string none
+time.initial double 0
+time.final double 10
+
+# Dimensions :
+state.dimension integer 4
+control.dimension integer 2
+algebraic.dimension integer 2
+parameter.dimension integer 0
+constant.dimension integer 1
+boundarycond.dimension integer 6
+constraint.dimension integer 2
+
+# Discretization :
+discretization.steps integer 100
+discretization.method string midpoint
+
+# Optimization :
+optimization.type string single
+batch.type integer 0
+batch.index integer 0
+batch.nrange integer 1
+batch.lowerbound double 0
+batch.upperbound double 0
+batch.directory string none
+
+# Initialization :
+initialization.type string from_init_file
+initialization.file string none
+
+# Parameter identification :
+paramid.type string false
+paramid.separator string ,
+paramid.file string no_directory
+paramid.dimension integer 0
+
+# Names :
+state.0 string y_1
+state.1 string y_2
+state.2 string x_1
+state.3 string x_2
+state.4 string J
+control.0 string x_1dot
+control.1 string x_2dot
+algebraic.0 string y_1dot
+algebraic.1 string y_2dot
+boundarycond.0 string y_1(0)
+boundarycond.1 string y_2(0)
+boundarycond.2 string x_1(0)
+boundarycond.3 string x_2(0)
+boundarycond.4 string y_1(10)
+boundarycond.5 string y_2(10)
+boundarycond.6 string J(0)
+constraint.0 string constraint
+constant.0 string radius
+
+# Solution file :
+solution.file string problem.sol
+
+# Iteration output frequency :
+iteration.output.frequency integer 0
+

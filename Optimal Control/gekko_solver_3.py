@@ -11,7 +11,7 @@ IV=[5,5] #Initial position
 
 g=GEKKO(remote=True)
 
-nt = 501 #number of timesteps
+nt = 400 #number of timesteps
 g.time=np.linspace(0,100,nt)
 
 #STATUS = 1 implies that the variable is being optimized by the solver
@@ -168,7 +168,7 @@ g.Minimize(final*1e5*(y1-3)**2)
 g.Minimize(final*1e5*(y2-3)**2)
 
 g.options.IMODE = 6  # optimal control
-g.options.NODES = 10  # collocation nodes
+g.options.NODES = 2  # collocation nodes
 g.options.SOLVER = 3 # solver
 g.options.MAX_ITER = 10000
 g.solver_options={'print_info_string yes'}
@@ -200,19 +200,23 @@ xx, yy = np.mgrid[0:10:31j,
 def filt(x):
     if x>=1:
         return 1
+    elif x<=0:
+        return 1e-5
     else:
         return x
 while counter < len(g.time):   
     ux = np.zeros_like(xx)
     uy = np.zeros_like(xx)
     uu=np.zeros_like(xx)
-    for i in range(g.time.size):
-        for j in range(g.time.size):
+    for i in range(0,xx[:,0].size):
+        for j in range(0,xx[:,0].size):
             X = np.array([xx[i,j],yy[i,j]])
             #mat = ss.stresslet_tens(x0, X)
             #vel = np.tensordot(Smat, mat)
-            vel = 0.25*(3/4)*blakelet_vec(X-np.array([x11.value[counter],x12.value[counter]]), [v11.value[counter],v12.value[counter]],x12.value[counter])+\
-                0.25*(3/4)*blakelet_vec(X-np.array([x21.value[counter],x22.value[counter]]), [v21.value[counter],v22.value[counter]],x22.value[counter])
+            vel = 0.25*(3/4)*blakelet_vec(X-np.array([x11.value[counter],x12.value[counter]]), 
+                np.array([v11.value[counter],v12.value[counter]]),np.array([-v11.value[counter],-v12.value[counter]]),x12.value[counter])#+\
+             #     0.25*(3/4)*blakelet_vec(X-np.array([x21.value[counter],x22.value[counter]]), 
+             #   np.array([v21.value[counter],v22.value[counter]]),np.array([-v21.value[counter],-v22.value[counter]]),x22.value[counter])
             #display(vel - ss.stresslet_vec(X-x0, Fvec, evec))
             ux[i,j] = vel[0]
             uy[i,j] = vel[1]
@@ -221,8 +225,7 @@ while counter < len(g.time):
 
     ax = fig.add_subplot(111)
     
-    Q=ax.quiver(xx.T[:,0],yy.T[0,:],ux.T,uy.T,uu.T,cmap='autumn',
-           norm=colors.LogNorm(vmin=uu.min(),vmax=uu.max()),scale=2)
+    Q=ax.quiver(xx.T[:,0],yy.T[0,:],ux.T,uy.T,uu.T)
     fig.colorbar(Q,extend='max')
     ax.set_xlabel('x')
     ax.set_ylabel('y')
@@ -232,7 +235,7 @@ while counter < len(g.time):
     ax.plot(x11.value[0:counter],x12.value[0:counter], label='Active')
     ax.plot(x21.value[0:counter],x22.value[0:counter], label='Active')
     ax.scatter(x11.value[counter],x12.value[counter],c='r')
-    ax.scatter(x21.value[counter],x22.value[counter],c='r')
+    #ax.scatter(x21.value[counter],x22.value[counter],c='r')
 
     ax.set_xlim(-10,10)
     ax.set_ylim(-10,10)
@@ -248,9 +251,9 @@ def Lin_ODE(t,y,args):
     v11,v12,v21,v22,x11,x12,x21,x22=args
     y1=y[0]
     y2=y[1]
-    y_velocity1=(3/4)*blakelet_vec([y1-x11,y2-x12],[v11,v12],[-v11,-v12],x12)
+    y_velocity1=(3/4)*blakelet_vec(np.array([y1-x11,y2-x12]),np.array([v11,v12]),np.array([-v11,-v12]),x12)
     #contribution from first active particle
-    y_velocity2=(3/4)*blakelet_vec([y1-x21,y2-x22],[v21,v22],[-v21,-v22],x22)
+    y_velocity2=(3/4)*blakelet_vec(np.array([y1-x21,y2-x22]),np.array([v21,v22]),np.array([-v21,-v22]),x22)
     #contribution from second active particle
     return y_velocity1+y_velocity2
 
