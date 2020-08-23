@@ -114,7 +114,7 @@ def regularized_stokeslet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):
     ydot1=(rinvsq1**(3/2))*(r1r1*v11+2*(e**2)*v11+r1v1*r11) \
         + (rinvsq2**(3/2))*(r2r2*v21+2*(e**2)*v21+r2v2*r21)
     ydot2=(rinvsq1**(3/2))*(r1r1*v12+2*(e**2)*v12+r1v1*r12) \
-        + (rinvsq2**(3/2))*(r2r2*v22+2*(e**2)*v22+r2v2*r22)
+        + (rinvsq2**(3/2))*(r2r2*v22+2*(e**2)*v22+r2v2*r22) 
     return 0.1*(3/4)*np.array([ydot1,ydot2])
 
 def blakelet(y1,y2,x11,x12,x21,x22,v11,v12,v21,v22):

@@ -75,8 +75,8 @@ def _detG2(y1,x1,x2):
 detG2=np.vectorize(_detG2)
 #_detG=sy.lambdify([y1,y2,x11,x22],sy.det(G))
 #detG=np.vectorize(_detG,excluded={0,1})
-Xx1=np.arange(-10,10,0.1)
-Xx2=np.arange(-10,10,0.1)
+Xx1=np.arange(-1,1,0.01)
+Xx2=np.arange(-1,1,0.01)
 Yy =np.arange(-5,5,0.1)
 
 mode=1
@@ -93,6 +93,21 @@ if mode==0:
     X1,X2=np.meshgrid(Xx1,Xx2)
     fig,ax=pl.subplot(1)
 
+if mode==2:
+    X1,X2=np.meshgrid(Xx1,Xx2)
+    fig, axes = pl.subplots(1,1,sharex=True,sharey=True)
+    fig.subplots_adjust(hspace=0,wspace=0)
+    matplotlib.rcParams['contour.negative_linestyle'] = 'solid'
+
+    Z=np.arctan(detG3(1,1,np.tan(np.pi/2 * X1),np.tan(np.pi/2 * X2)))*2/np.pi
+    CS = axes.pcolormesh(X1,X2,Z)
+    CS2 = axes.contour(X1,X2,Z,colors='k')
+
+    #pl.savefig('lin_det_'+('%03d'%counter)+'.png')
+
+    fig.colorbar(CS,ax=axes)
+    pl.show()
+ 
 
 
 if mode==1:
@@ -108,9 +123,9 @@ if mode==1:
             b=j+2
             axes[a,b].clear()
 
-            Z=detG3(i,j,X1,X2)
+            Z=np.arctan(detG3(np.tan(np.pi/2 * X1),np.tan(np.pi/2 * X2),i,j))*2/np.pi
             CS = axes[a,b].pcolormesh(X1,X2,Z)
-            CS2 = axes[a,b].contour(X1,X2,Z,colors='w')
+            CS2 = axes[a,b].contour(X1,X2,Z,colors='w',linewidths=0.75)
 
             #CS = axes[a,b].contour(X1,X2,Z,colors='r',linestyles='dotted',levels=[-0.01,0.01])
 
@@ -118,16 +133,16 @@ if mode==1:
             #pl.savefig('lin_det_'+('%03d'%counter)+'.png')
             print([i,j])
 
-    axes[4,0].set_xlabel(r'$x_1 \in [-10,10],  y_1=-2$')
-    axes[4,1].set_xlabel(r'$x_1 \in [-10,10],  y_1=-1$')
-    axes[4,2].set_xlabel(r'$x_1 \in [-10,10],  y_1=0$')
-    axes[4,3].set_xlabel(r'$x_1 \in [-10,10],  y_1=1$')
-    axes[4,4].set_xlabel(r'$x_1 \in [-10,10],  y_1=2$')
-    axes[0,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=-2$')
-    axes[1,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=-1$')
-    axes[2,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=0$')
-    axes[3,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=1$')
-    axes[4,0].set_ylabel(r'$x_2 \in [-5,5],  y_2=2$')
+    axes[4,0].set_xlabel(r'$x_1=-2$')
+    axes[4,1].set_xlabel(r'$x_1=-1$')
+    axes[4,2].set_xlabel(r'$x_1=0$')
+    axes[4,3].set_xlabel(r'$x_1=1$')
+    axes[4,4].set_xlabel(r'$x_1=2$')
+    axes[0,0].set_ylabel(r'$x_2=-2$')
+    axes[1,0].set_ylabel(r'$x_2=-1$')
+    axes[2,0].set_ylabel(r'$x_2=0$')
+    axes[3,0].set_ylabel(r'$x_2=1$')
+    axes[4,0].set_ylabel(r'$    x_2=2$')
 
     fig.colorbar(CS,ax=axes.ravel().tolist())
     pl.show()
