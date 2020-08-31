@@ -1,0 +1,119 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 12.1' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      3365,        111]
+NotebookOptionsPosition[      3014,         97]
+NotebookOutlinePosition[      3413,        113]
+CellTagsIndexPosition[      3370,        110]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[{
+ RowBox[{"ClearAll", "[", "\"\<Global'*\>\"", "]"}], "\[IndentingNewLine]", 
+ RowBox[{
+  RowBox[{
+   RowBox[{"G", "[", 
+    RowBox[{"r1_", ",", "r2_"}], "]"}], ":=", 
+   RowBox[{
+    RowBox[{"3", "/", "40"}], 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{
+         RowBox[{
+          RowBox[{"r1", "^", "2"}], "/", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"r1", "^", "2"}], "+", 
+              RowBox[{"r2", "^", "2"}]}], ")"}], "^", 
+            RowBox[{"(", 
+             RowBox[{"3", "/", "2"}], ")"}]}], ")"}]}], "+", 
+         RowBox[{"1", "/", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"r1", "^", "2"}], "+", 
+              RowBox[{"r2", "^", "2"}]}], ")"}], "^", 
+            RowBox[{"(", 
+             RowBox[{"1", "/", "2"}], ")"}]}], ")"}]}]}], ",", 
+        RowBox[{"r1", " ", 
+         RowBox[{"r2", "/", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"r1", "^", "2"}], "+", 
+              RowBox[{"r2", "^", "2"}]}], ")"}], "^", 
+            RowBox[{"(", 
+             RowBox[{"3", "/", "2"}], ")"}]}], ")"}]}]}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"r1", " ", 
+         RowBox[{"r2", "/", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"r1", "^", "2"}], "+", 
+              RowBox[{"r2", "^", "2"}]}], ")"}], "^", 
+            RowBox[{"(", 
+             RowBox[{"3", "/", "2"}], ")"}]}], ")"}]}]}], ",", 
+        RowBox[{
+         RowBox[{
+          RowBox[{"r2", "^", "2"}], "/", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"r1", "^", "2"}], "+", 
+              RowBox[{"r2", "^", "2"}]}], ")"}], "^", 
+            RowBox[{"(", 
+             RowBox[{"3", "/", "2"}], ")"}]}], ")"}]}], "+", 
+         RowBox[{"1", "/", 
+          RowBox[{"(", 
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{"r1", "^", "2"}], "+", 
+              RowBox[{"r2", "^", "2"}]}], ")"}], "^", 
+            RowBox[{"(", 
+             RowBox[{"1", "/", "2"}], ")"}]}], ")"}]}]}]}], "}"}]}], 
+     "}"}]}]}], ";"}]}], "Input",ExpressionUUID->"bde32f75-a0dd-422c-9fb8-\
+5c23a401aa35"]
+},
+WindowSize->{1920, 997},
+WindowMargins->{{-8, Automatic}, {Automatic, -8}},
+FrontEndVersion->"12.1 for Microsoft Windows (64-bit) (June 19, 2020)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"89512bff-d58c-4066-8b55-ce864d25051f"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 2452, 75, 48, "Input",ExpressionUUID->"bde32f75-a0dd-422c-9fb8-5c23a401aa35"]
+}
+]
+*)
+
