@@ -53,6 +53,9 @@ def circ_solver(u1vals,u2vals,theta1vals,theta2vals,y0,tvals):
         print('t = ' + str(tvals[i]))   
     return trajectory
 
+
+
+
 def lin_control(t):
     return t
 def lin_vel(t):
@@ -74,30 +77,30 @@ def lin_solver(xvals,uvals,y0,tvals):
         print('t = ' + str(tvals[i]))   
     return trajectory
 
-def _filt(x):
-    return np.tanh(x)
-filt=np.vectorize(_filt)
+# def _filt(x):
+#     return np.tanh(x)
+# filt=np.vectorize(_filt)
 
-tvalss=np.arange(-200,200,0.05)
-xvals=lin_control(tvalss)
-uvals=lin_vel(tvalss)
-y0=np.array([0,2])
+# tvalss=np.arange(-200,200,0.05)
+# xvals=lin_control(tvalss)
+# uvals=lin_vel(tvalss)
+# y0=np.array([0,2])
 
-soln = lin_solver(xvals,uvals,y0,tvalss)
+# soln = lin_solver(xvals,uvals,y0,tvalss)
 
-tvals=np.arange(-200,200,5)
-# pl.plot(tvals,soln[:,0])
-# pl.plot(tvals,soln[:,1])
-# pl.show()
-fig=pl.figure()
-ax=fig.add_subplot(111)
-counter=0
-xv=np.linspace(-2,2,30)
-yv=np.linspace(-1,3,30)
+# tvals=np.arange(-200,200,5)
+# # pl.plot(tvals,soln[:,0])
+# # pl.plot(tvals,soln[:,1])
+# # pl.show()
+# fig=pl.figure()
+# ax=fig.add_subplot(111)
+# counter=0
+# xv=np.linspace(-2,2,30)
+# yv=np.linspace(-1,3,30)
 
-xx,yy=np.meshgrid(xv,yv)
-ax.plot(soln[:,0],soln[:,1])
-pl.grid()
+# xx,yy=np.meshgrid(xv,yv)
+# ax.plot(soln[:,0],soln[:,1])
+# pl.grid()
 # def animate(counter):
 #     counter=int(counter*5/0.05)
 #     ax.clear()
