@@ -93,8 +93,8 @@ g.Equation(J==g.integral(g.abs(v11*f1[0]+v12*f1[1]+v21*f2[0]+v22*f2[1])))
 final = g.Param(np.zeros(nt)); final[-1]=1
 g.Minimize(J*final)
 #g.Equation(1e3*g.exp(-((y1-x11)**2+(y2-x22)**2+(y1-x21)**2+(y2-x22)**2)) < 1)
-g.Minimize(final*1e5*(y1-51)**2)
-g.Minimize(final*1e5*(y2-52)**2)
+g.Minimize(final*1e5*(y1-45)**2)
+g.Minimize(final*1e5*(y2-50)**2)
 
 g.options.IMODE = 6  # optimal control
 g.options.NODES = 2  # collocation nodes
