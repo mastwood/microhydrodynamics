@@ -142,7 +142,7 @@ if mode==1:
     axes[1,0].set_ylabel(r'$x_2=-1$')
     axes[2,0].set_ylabel(r'$x_2=0$')
     axes[3,0].set_ylabel(r'$x_2=1$')
-    axes[4,0].set_ylabel(r'$    x_2=2$')
+    axes[4,0].set_ylabel(r'$x_2=2$')
 
     fig.colorbar(CS,ax=axes.ravel().tolist())
     pl.show()
