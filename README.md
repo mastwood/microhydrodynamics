@@ -1,4 +1,4 @@
-My research in microhydrodynamics and control theory.
+Research in microhydrodynamics and control theory.
 
 # Dynamics Solvers
 - field_lines.py computes the field lines for various stokes singularities
