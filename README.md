@@ -10,8 +10,8 @@ Research in microhydrodynamics and control theory.
 # Optimal Control
 - direct_multiple_shooting.py implements the multiple direct shooting algorithm using CasADi
 - direct_multiple_shooting_dae.py is an alternative implementation of direct multiple shooting
-- gekko_solver.py and gekko_solver.py implement direct orthogonal collocation using GEKKO
+- gekko_solver.py and gekko_solver_2.py implement direct orthogonal collocation using GEKKO
 - indirect_single_shooting.py is an attempt at the Pontryagin Minumum Principle as applied to this control problem
 
 # Symbolics
-- these files simply compute some determinants and vector fields symbolically.
+- mostly mathematica files, containing solvers and plotters for the perturbation problem and for the full problem

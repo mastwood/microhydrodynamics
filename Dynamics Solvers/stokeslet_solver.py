@@ -8,9 +8,9 @@ import time
 import numpy as np 
 import matplotlib.pyplot as pl 
 import scipy.integrate as odes
-import quaternions
 import subprocess
 from scipy.spatial.transform import Rotation as Rrr
+import quaternions
 #import StokesSingularities as ss 
 
 # grid setup
@@ -48,6 +48,7 @@ trajectory4=np.empty((TT.size,3)) #trajectory of particle
 
 singularity_pos = lambda t: np.array([0.0,5*np.cos(2*np.pi*t),5*np.sin(2*np.pi*t)],dtype=object)
 
+#Singularity goes in a semicircle
 def singularity_pos20(t):
     t = t-np.floor(t)
     if t <= 0.25:
@@ -63,6 +64,7 @@ singularity_position=np.array([singularity_pos(t) for t in TT])
 singularity_position2=np.array([singularity_pos20(t) for t in TT])
 singularity_position3=np.array([singularity_pos20(t+0.25) for t in TT])
 singularity_velocity = lambda t: np.array([0.0,-5*2*np.pi*np.sin(2*np.pi*t),5*2*np.pi*np.cos(2*np.pi*t)])
+
 def singularity_velocity20(t):
     t = t-np.floor(t)
     if t <= 0.25:
@@ -84,7 +86,7 @@ stokeslet_vectorRrr = lambda x,t: stokeslet_vec(np.matmul(Rot0,x),np.matmul(Rot0
 rotator = lambda x: np.matmul(Rot0,x)
 singularity_pos_rot = np.array([rotator(singularity_pos20(t-0.25)) for t in TT])
 
-#Solve ode
+#calculate velocities
 def velocity(t,y):
     return stokeslet_vector(y-singularity_pos(t),t)
 def velocity2(t,y):
@@ -160,11 +162,6 @@ ax = fig.add_subplot(111)
 ax.grid()
 ax.plot(trajectories[0][:,1],trajectories[0][:,2],'k')
 
-#x_params = np.polyfit(TT, trajectories[0][:,1], 2)
-#y_params = np.polyfit(TT, trajectories[0][:,2], 2)
-#xpxp = np.poly1d(x_params)
-#ypyp = np.poly1d(y_params)
-#ax.plot(xpxp(TT),ypyp(TT),'k--')
 # ax.plot(trajectories[1][:,0],trajectories[1][:,1],trajectories[1][:,2],lw=0.5)
 # ax.plot(trajectories[2][:,0],trajectories[2][:,1],trajectories[2][:,2],lw=0.5)
 # ax.plot(trajectories[3][:,0],trajectories[3][:,1],trajectories[3][:,2],lw=0.5)
@@ -175,6 +172,8 @@ ax.set_xlabel('y')
 ax.set_ylabel('z')
 ax.set_aspect(1)
 pl.show()
+
+#CODE FOR ANIMATIONS
 
 # #print(singularity_position[1])
 # counter=0
